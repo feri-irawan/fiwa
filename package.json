@@ -1,0 +1,18 @@
+{
+  "name": "fiwa",
+  "description": "A simple WhatsApp bot",
+  "version": "0.1.0",
+  "module": "src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "author": "Feri Irawan",
+  "homepage": "https://github.com/feri-irawan/fiwa#readme",
+  "repository": "https://github.com/feri-irawan/fiwa",
+  "bugs": "https://github.com/feri-irawan/fiwa/issues",
+  "license": "MIT"
+}
