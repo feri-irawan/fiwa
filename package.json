@@ -1,6 +1,6 @@
 {
   "name": "fiwa",
-  "description": "A simple WhatsApp bot",
+  "description": "A lightweight WhatsApp bot with built-in MongoDB integration.",
   "version": "0.2.0",
   "module": "src/index.ts",
   "type": "module",
@@ -37,6 +37,7 @@
   "keywords": [
     "whatsapp",
     "baileys",
+    "mongodb",
     "typescript",
     "automation",
     "messaging",
