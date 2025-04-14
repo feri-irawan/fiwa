@@ -12,6 +12,7 @@ import NodeCache from "node-cache";
 import P from "pino";
 import { WhatsAppError } from "./errors";
 import type { FiWhatsAppOptions } from "./types";
+import { rm } from "fs/promises";
 
 export class FiWhatsAppClient extends EventEmitter {
   sock: WASocket;
@@ -24,6 +25,7 @@ export class FiWhatsAppClient extends EventEmitter {
   private isConnected: boolean;
   private browser: keyof typeof Browsers;
   private device: string;
+  private phoneNumber: string;
 
   constructor(options: FiWhatsAppOptions = {}) {
     super();
@@ -34,6 +36,7 @@ export class FiWhatsAppClient extends EventEmitter {
     }
 
     this.sock = {} as WASocket;
+    this.phoneNumber = options.phoneNumber || "";
     this.logPath = options.logPath || "./whatsapp.log";
     this.sessionDir = options.sessionDir || "./whatsapp_session";
     this.maxRetries = options.maxRetries || 3;
@@ -81,7 +84,7 @@ export class FiWhatsAppClient extends EventEmitter {
       this.sock = makeWASocket({
         browser: Browsers[this.browser](this.device),
         logger: this.logger,
-        printQRInTerminal: true,
+        printQRInTerminal: !this.phoneNumber,
         markOnlineOnConnect: false,
         auth: {
           creds: state.creds,
@@ -119,6 +122,13 @@ export class FiWhatsAppClient extends EventEmitter {
       if (qr) {
         this.emit("qr", qr);
         this.logger.info("QR code received");
+
+        // Request pairing code if phone number is provided
+        if (this.phoneNumber && !this.sock.authState.creds.registered) {
+          this.logger.info("Requesting pairing code");
+          const code = await this.sock.requestPairingCode(this.phoneNumber);
+          this.emit("pairingCode", code);
+        }
       }
 
       if (connection === "open") {
@@ -140,6 +150,19 @@ export class FiWhatsAppClient extends EventEmitter {
         if (!isLoggedOut) {
           if (this.retryCount < this.maxRetries) {
             this.retryCount++;
+
+            // Delete the session directory if failed to reconnect with a phone number.
+            // Why? Because if the session directory is not deleted or empty, connecting with a phone number will throw an error, even if we retry to connect many times.
+            // So, we need to delete the session directory and restart the client to fix it.
+            // Why >1? Because the first retry is just a normal retry, after scanning the QR code. Ref: https://baileys.wiki/docs/socket/connecting
+            if (
+              this.retryCount > 1 &&
+              (this.phoneNumber || this.sock.authState.creds.me)
+            ) {
+              this.logger.info("Deleting session directory");
+              await rm(this.sessionDir, { recursive: true, force: true });
+            }
+
             this.logger.info(
               `Attempting reconnection (${this.retryCount}/${this.maxRetries})`
             );

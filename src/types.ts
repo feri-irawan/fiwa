@@ -6,4 +6,5 @@ export interface FiWhatsAppOptions {
   maxRetries?: number;
   browser?: keyof typeof Browsers;
   device?: string;
+  phoneNumber?: string;
 }
