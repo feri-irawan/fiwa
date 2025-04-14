@@ -13,7 +13,7 @@ import P from "pino";
 import { WhatsAppError } from "./errors";
 import type { FiWhatsAppEventMap, FiWhatsAppOptions } from "./types";
 import { rm } from "fs/promises";
-import { useNoSQLAuthState } from "./useNoSQLAuthState";
+import { useMongoDBAuthState } from "./useMongoDBAuthState";
 
 export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
   sock: WASocket;
@@ -85,7 +85,7 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
       if (this.mongodb) {
         console.log("Using MongoDB for session state");
         const { url, databaseName, collectionName } = this.mongodb;
-        auth = await useNoSQLAuthState(url, databaseName, collectionName);
+        auth = await useMongoDBAuthState(url, databaseName, collectionName);
       } else {
         console.log("Using file system for session state");
         auth = await useMultiFileAuthState(this.sessionDir);

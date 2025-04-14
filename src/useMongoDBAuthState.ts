@@ -57,7 +57,7 @@ export const logoutInMongoDB = async (
 /**
  * Adapter to store authentication state in a NoSQL database (MongoDB)
  */
-export const useNoSQLAuthState = async (
+export const useMongoDBAuthState = async (
   dbUri: string,
   dbName: string,
   collectionName: string
