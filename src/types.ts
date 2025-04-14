@@ -22,6 +22,7 @@ export interface FiWhatsAppEventMap {
   logout: [];
   error: [Error];
   message: [WAMessage];
+  messageFromClient: [WAMessage];
   "messages.delete": [BaileysEventMap["messages.delete"]];
   "messages.update": [BaileysEventMap["messages.update"]];
 }

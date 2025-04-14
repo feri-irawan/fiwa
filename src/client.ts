@@ -184,8 +184,15 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
     this.sock.ev.on("messages.upsert", async ({ type, messages }) => {
       if (type === "notify") {
         for (const message of messages) {
-          this.emit("message", message);
-          this.logger.debug("Received message:", message.key.id);
+          // Message sent by client
+          if (message.key.fromMe) {
+            this.emit("messageFromClient", message);
+            this.logger.debug("Message sent by client:", message.key.id);
+          } else {
+            // Received message from another user
+            this.emit("message", message);
+            this.logger.debug("Received message:", message.key.id);
+          }
         }
       }
     });
