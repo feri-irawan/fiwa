@@ -32,5 +32,18 @@
   "homepage": "https://github.com/feri-irawan/fiwa#readme",
   "repository": "https://github.com/feri-irawan/fiwa",
   "bugs": "https://github.com/feri-irawan/fiwa/issues",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "whatsapp",
+    "baileys",
+    "typescript",
+    "automation",
+    "messaging",
+    "js-whatsapp",
+    "whatsapp-api",
+    "whatsapp-web",
+    "whatsapp-chat",
+    "whatsapp-group",
+    "multi-device"
+  ]
 }
