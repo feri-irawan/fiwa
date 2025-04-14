@@ -13,6 +13,7 @@ import P from "pino";
 import { WhatsAppError } from "./errors";
 import type { FiWhatsAppEventMap, FiWhatsAppOptions } from "./types";
 import { rm } from "fs/promises";
+import { useNoSQLAuthState } from "./useNoSQLAuthState";
 
 export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
   sock: WASocket;
@@ -26,6 +27,7 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
   private browser: keyof typeof Browsers;
   private device: string;
   private phoneNumber: string;
+  private mongodb: Required<FiWhatsAppOptions["mongodb"]>;
 
   constructor(options: FiWhatsAppOptions = {}) {
     super();
@@ -44,6 +46,13 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
     this.isConnected = false;
     this.browser = options.browser || "macOS";
     this.device = options.device || "Desktop";
+    this.mongodb = options.mongodb
+      ? {
+          ...options.mongodb,
+          databaseName: options.mongodb.databaseName || "fiwa",
+          collectionName: options.mongodb.collectionName || "fiwa_auth_state",
+        }
+      : undefined;
 
     this.groupCache = new NodeCache({
       stdTTL: 60 * 60, // 1 hour
@@ -72,7 +81,16 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
       this.logger.info("Connecting to WhatsApp...");
 
       // Create session state
-      const { state, saveCreds } = await useMultiFileAuthState(this.sessionDir);
+      let auth;
+      if (this.mongodb) {
+        console.log("Using MongoDB for session state");
+        const { url, databaseName, collectionName } = this.mongodb;
+        auth = await useNoSQLAuthState(url, databaseName, collectionName);
+      } else {
+        console.log("Using file system for session state");
+        auth = await useMultiFileAuthState(this.sessionDir);
+      }
+      const { state, saveCreds } = auth;
 
       // Get latest WhatsApp version
       const { version, isLatest } = await fetchLatestBaileysVersion();

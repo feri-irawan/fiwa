@@ -16,6 +16,7 @@
   ],
   "dependencies": {
     "baileys": "^6.7.16",
+    "mongodb": "^6.15.0",
     "node-cache": "^5.1.2"
   },
   "devDependencies": {

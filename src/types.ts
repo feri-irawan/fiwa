@@ -12,6 +12,11 @@ export interface FiWhatsAppOptions {
   browser?: keyof typeof Browsers;
   device?: string;
   phoneNumber?: string;
+  mongodb?: {
+    url: string;
+    databaseName?: string;
+    collectionName?: string;
+  };
 }
 
 export interface FiWhatsAppEventMap {
