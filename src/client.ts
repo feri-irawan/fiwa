@@ -11,10 +11,10 @@ import { EventEmitter } from "events";
 import NodeCache from "node-cache";
 import P from "pino";
 import { WhatsAppError } from "./errors";
-import type { FiWhatsAppOptions } from "./types";
+import type { FiWhatsAppEventMap, FiWhatsAppOptions } from "./types";
 import { rm } from "fs/promises";
 
-export class FiWhatsAppClient extends EventEmitter {
+export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
   sock: WASocket;
   private logger: P.Logger;
   private logPath: string;
