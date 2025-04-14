@@ -46,6 +46,44 @@ client.on("message", (message) => {
 client.start();
 ```
 
+## MongoDB Integration
+
+fiwa uses the file system by default to store authentication state. However, fiwa now supports using MongoDB to store authentication state. This is useful for scenarios where you want to persist session data in a NoSQL database instead of the file system.
+
+### Configuration
+
+To use MongoDB for session state, provide the `mongodb` option when creating the `FiWhatsAppClient` instance:
+
+```ts
+const client = new FiWhatsAppClient({
+  mongodb: {
+    url: "<your-mongodb-url>",
+    databaseName: "<your-database-name>", // Optional, defaults to "fiwa"
+    collectionName: "<your-collection-name>", // Optional, defaults to "fiwa_auth_state"
+  },
+});
+```
+
+### Example
+
+```ts
+import { FiWhatsAppClient } from "fiwa";
+
+const client = new FiWhatsAppClient({
+  mongodb: {
+    url: "mongodb+srv://username:password@cluster.mongodb.net",
+  },
+});
+
+client.on("ready", () => {
+  console.log("Client is ready");
+});
+
+client.start();
+```
+
+When using MongoDB, the library will automatically handle storing and retrieving authentication credentials and keys from the specified collection.
+
 ## API Reference
 
 ### `FiWhatsAppClient`
