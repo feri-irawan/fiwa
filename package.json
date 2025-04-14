@@ -4,6 +4,16 @@
   "version": "0.1.0",
   "module": "src/index.ts",
   "type": "module",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "tsc && bun scripts/build.ts"
+  },
+  "files": [
+    "dist",
+    "package.json",
+    "README.md"
+  ],
   "dependencies": {
     "baileys": "^6.7.16",
     "node-cache": "^5.1.2"
@@ -12,6 +22,10 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
+    "jimp": "^1.6.0",
+    "link-preview-js": "^3.0.14",
+    "qrcode-terminal": "^0.12.0",
+    "sharp": "^0.34.1",
     "typescript": "^5"
   },
   "author": "Feri Irawan",
