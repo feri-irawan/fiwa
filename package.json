@@ -4,7 +4,12 @@
   "version": "0.2.0",
   "module": "src/index.ts",
   "type": "module",
-  "types": "dist/index.d.ts",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs",
+    "types": "./dist/index.d.ts"
+  },
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "tsc && bun scripts/build.ts"
