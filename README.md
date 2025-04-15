@@ -71,7 +71,7 @@ import { FiWhatsAppClient } from "fiwa";
 
 const client = new FiWhatsAppClient({
   mongodb: {
-    url: "mongodb+srv://username:password@cluster.mongodb.net",
+    url: "mongodb+srv://...",
   },
 });
 
