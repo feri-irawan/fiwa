@@ -3,22 +3,22 @@
   "description": "A lightweight WhatsApp bot with built-in MongoDB integration.",
   "version": "1.0.1",
   "type": "module",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/types/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    "bun": "./dist/esm/index.js",
-    "node": "./dist/cjs/index.js",
-    "import": "./dist/esm/index.js",
-    "require": "./dist/cjs/index.js",
-    "default": "./dist/esm/index.js",
-    "types": "./dist/types/index.d.ts"
+    "types": {
+      "import": "./dist/index.d.ts",
+      "require": "./dist/index.d.cts"
+    },
+    "bun": "./dist/index.js",
+    "node": "./dist/index.cjs",
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs",
+    "default": "./dist/index.js"
   },
   "scripts": {
-    "prebuild": "rm -rf dist",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build": "bun run build:esm && bun run build:cjs"
+    "build": "tsup"
   },
   "files": [
     "dist",
@@ -28,7 +28,8 @@
   "dependencies": {
     "baileys": "^6.7.16",
     "mongodb": "^6.15.0",
-    "node-cache": "^5.1.2"
+    "node-cache": "^5.1.2",
+    "tsup": "^8.4.0"
   },
   "devDependencies": {
     "@types/bun": "latest"
