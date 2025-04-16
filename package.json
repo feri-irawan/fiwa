@@ -2,17 +2,23 @@
   "name": "fiwa",
   "description": "A lightweight WhatsApp bot with built-in MongoDB integration.",
   "version": "0.2.1",
-  "module": "src/index.ts",
   "type": "module",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
   "exports": {
-    "import": "./dist/index.js",
-    "require": "./dist/index.cjs",
-    "types": "./dist/index.d.ts"
+    "bun": "./dist/esm/index.js",
+    "node": "./dist/cjs/index.cjs",
+    "import": "./dist/esm/index.js",
+    "require": "./dist/cjs/index.cjs",
+    "default": "./dist/esm/index.js",
+    "types": "./dist/types/index.d.ts"
   },
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build": "tsc && bun scripts/build.ts"
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build": "bun run build:esm && bun run build:cjs"
   },
   "files": [
     "dist",
