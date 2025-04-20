@@ -13,7 +13,7 @@ import P from "pino";
 import { WhatsAppError } from "./errors";
 import type { FiWhatsAppEventMap, FiWhatsAppOptions } from "./types";
 import { rm } from "fs/promises";
-import { useMongoDBAuthState } from "./useMongoDBAuthState";
+import { logoutInMongoDB, useMongoDBAuthState } from "./useMongoDBAuthState";
 
 export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
   sock: WASocket;
@@ -191,9 +191,7 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
             this.emit("error", new WhatsAppError("Max retries reached"));
           }
         } else {
-          this.logger.info("Logged out");
-          await this.sock.logout();
-          this.emit("logout");
+          this.logout();
         }
       }
     });
@@ -228,15 +226,22 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
     });
   }
 
-  public async disconnect(): Promise<void> {
+  public async logout(): Promise<void> {
     try {
       if (this.sock) {
+        // Clear auth state in MongoDB
+        if (this.mongodb) {
+          const { url, databaseName, collectionName } = this.mongodb;
+          await logoutInMongoDB(url, databaseName, collectionName);
+        }
+
         await this.sock.logout();
+        this.emit("logout");
         this.isConnected = false;
-        this.logger.info("Disconnected from WhatsApp");
+        this.logger.info("Logged out from WhatsApp");
       }
     } catch (error) {
-      this.logger.error("Error disconnecting:", error);
+      this.logger.error("Error logging out:", error);
       throw error;
     }
   }
