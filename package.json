@@ -27,7 +27,7 @@
   ],
   "dependencies": {
     "baileys": "^6.7.18",
-    "mongodb": "^6.16.0",
+    "mongodb": "^6.17.0",
     "node-cache": "^5.1.2",
     "tsup": "^8.5.0"
   },
