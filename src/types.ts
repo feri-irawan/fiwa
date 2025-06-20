@@ -17,7 +17,7 @@ export interface FiWhatsAppOptions {
         databaseName?: string;
         collectionName?: string;
     };
-    baileysOptions?: UserFacingSocketConfig;
+    baileysOptions?: Partial<UserFacingSocketConfig>;
 }
 
 export interface FiWhatsAppEventMap {
