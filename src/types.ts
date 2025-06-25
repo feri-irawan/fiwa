@@ -1,9 +1,4 @@
-import type {
-  Browsers,
-  WAMessage,
-  WAMessageUpdate,
-  BaileysEventMap,
-} from "baileys";
+import type { BaileysEventMap, Browsers, WAMessage } from 'baileys';
 
 export interface FiWhatsAppOptions {
   logPath?: string;
@@ -28,6 +23,6 @@ export interface FiWhatsAppEventMap {
   error: [Error];
   message: [WAMessage];
   messageFromClient: [WAMessage];
-  "messages.delete": [BaileysEventMap["messages.delete"]];
-  "messages.update": [BaileysEventMap["messages.update"]];
+  'messages.delete': [BaileysEventMap['messages.delete']];
+  'messages.update': [BaileysEventMap['messages.update']];
 }
