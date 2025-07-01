@@ -1,5 +1,5 @@
-import { MongoClient, Binary } from "mongodb";
-import { initAuthCreds, proto as WAProto } from "baileys";
+import { initAuthCreds, proto as WAProto } from 'baileys';
+import { Binary, MongoClient } from 'mongodb';
 
 let mongoClient: MongoClient | null = null;
 
@@ -10,7 +10,7 @@ const getMongoClient = async (dbUri: string) => {
   if (!mongoClient) {
     mongoClient = new MongoClient(dbUri);
     await mongoClient.connect();
-    console.log("MongoDB client connected");
+    console.log('MongoDB client connected');
   }
   return mongoClient;
 };
@@ -19,7 +19,7 @@ const getMongoClient = async (dbUri: string) => {
  * Converts a MongoDB Binary to a Node.js Buffer.
  */
 const convertBinaryToBuffer = (data: any): any => {
-  if (data && typeof data === "object") {
+  if (data && typeof data === 'object') {
     if (data instanceof Binary) {
       return data.buffer;
     }
@@ -36,7 +36,7 @@ const convertBinaryToBuffer = (data: any): any => {
 export const logoutInMongoDB = async (
   dbUri: string,
   dbName: string,
-  collectionName: string
+  collectionName: string,
 ) => {
   const client = await getMongoClient(dbUri);
   const db = client.db(dbName);
@@ -51,7 +51,7 @@ export const logoutInMongoDB = async (
   }
   await client.close();
   mongoClient = null;
-  console.log("MongoDB connection closed");
+  console.log('MongoDB connection closed');
 };
 
 /**
@@ -60,7 +60,7 @@ export const logoutInMongoDB = async (
 export const useMongoDBAuthState = async (
   dbUri: string,
   dbName: string,
-  collectionName: string
+  collectionName: string,
 ) => {
   const client = await getMongoClient(dbUri);
   const db = client.db(dbName);
@@ -70,7 +70,7 @@ export const useMongoDBAuthState = async (
     await collection.updateOne(
       { key },
       { $set: { key, data } },
-      { upsert: true }
+      { upsert: true },
     );
   };
 
@@ -83,7 +83,7 @@ export const useMongoDBAuthState = async (
     await collection.deleteOne({ key });
   };
 
-  const creds = (await readData("creds")) || initAuthCreds();
+  const creds = (await readData('creds')) || initAuthCreds();
 
   return {
     state: {
@@ -94,11 +94,11 @@ export const useMongoDBAuthState = async (
           await Promise.all(
             ids.map(async (id) => {
               let value = await readData(`${type}-${id}`);
-              if (type === "app-state-sync-key" && value) {
+              if (type === 'app-state-sync-key' && value) {
                 value = WAProto.Message.AppStateSyncKeyData.fromObject(value);
               }
               data[id] = value;
-            })
+            }),
           );
           return data;
         },
@@ -116,7 +116,7 @@ export const useMongoDBAuthState = async (
       },
     },
     saveCreds: () => {
-      return writeData(creds, "creds");
+      return writeData(creds, 'creds');
     },
   };
 };
