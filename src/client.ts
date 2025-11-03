@@ -102,7 +102,6 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
       this.sock = makeWASocket({
         browser: Browsers[this.browser](this.device),
         logger: this.logger,
-        printQRInTerminal: !this.phoneNumber,
         markOnlineOnConnect: false,
         auth: {
           creds: state.creds,
