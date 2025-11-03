@@ -1,4 +1,9 @@
-import type { BaileysEventMap, Browsers, WAMessage } from 'baileys';
+import type {
+  BaileysEventMap,
+  Browsers,
+  UserFacingSocketConfig,
+  WAMessage,
+} from 'baileys';
 
 export interface FiWhatsAppOptions {
   logPath?: string;
@@ -12,6 +17,7 @@ export interface FiWhatsAppOptions {
     databaseName?: string;
     collectionName?: string;
   };
+  baileysOptions?: Partial<UserFacingSocketConfig>;
 }
 
 export interface FiWhatsAppEventMap {
