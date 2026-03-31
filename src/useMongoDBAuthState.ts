@@ -1,5 +1,5 @@
-import { initAuthCreds, proto as WAProto } from 'baileys';
-import { Binary, MongoClient } from 'mongodb';
+import { BufferJSON, initAuthCreds, proto as WAProto } from 'baileys';
+import { MongoClient } from 'mongodb';
 
 let mongoClient: MongoClient | null = null;
 
@@ -13,21 +13,6 @@ const getMongoClient = async (dbUri: string) => {
     console.log('MongoDB client connected');
   }
   return mongoClient;
-};
-
-/**
- * Converts a MongoDB Binary to a Node.js Buffer.
- */
-const convertBinaryToBuffer = (data: any): any => {
-  if (data && typeof data === 'object') {
-    if (data instanceof Binary) {
-      return data.buffer;
-    }
-    for (const key in data) {
-      data[key] = convertBinaryToBuffer(data[key]);
-    }
-  }
-  return data;
 };
 
 /**
@@ -67,16 +52,23 @@ export const useMongoDBAuthState = async (
   const collection = db.collection(collectionName);
 
   const writeData = async (data: any, key: string) => {
+    const dataString = JSON.stringify(data, BufferJSON.replacer);
     await collection.updateOne(
       { key },
-      { $set: { key, data } },
+      { $set: { key, data: dataString } },
       { upsert: true },
     );
   };
 
   const readData = async (key: string) => {
     const result = await collection.findOne({ key });
-    return result ? convertBinaryToBuffer(result.data) : null;
+    if (result && result.data) {
+      if (typeof result.data === 'string') {
+        return JSON.parse(result.data, BufferJSON.reviver);
+      }
+      return result.data;
+    }
+    return null;
   };
 
   const removeData = async (key: string) => {

@@ -34,7 +34,7 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
     super();
 
     // Validate options
-    if (options.maxRetries && options.maxRetries < 1) {
+    if (options.maxRetries !== undefined && options.maxRetries < 1) {
       throw new WhatsAppError('maxRetries must be at least 1');
     }
 
@@ -84,7 +84,9 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
       this.logger.info('Connecting to WhatsApp...');
 
       // Create session state
-      let auth: ReturnType<typeof useMultiFileAuthState> | ReturnType<typeof useMongoDBAuthState>;
+      let auth:
+        | Awaited<ReturnType<typeof useMultiFileAuthState>>
+        | Awaited<ReturnType<typeof useMongoDBAuthState>>;
       if (this.mongodb) {
         this.logger.info('Using MongoDB for session state');
         const { url, databaseName, collectionName } = this.mongodb;
@@ -97,10 +99,13 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
 
       // Get latest WhatsApp version
       const { version, isLatest } = await fetchLatestBaileysVersion();
-      this.logger.info(`Using WhatsApp v${version.join('.')}, isLatest: ${isLatest}`);
+      this.logger.info(
+        `Using WhatsApp v${version.join('.')}, isLatest: ${isLatest}`,
+      );
 
       // Configure socket
       this.sock = makeWASocket({
+        version,
         browser: Browsers[this.browser](this.device),
         logger: this.logger,
         markOnlineOnConnect: false,
@@ -162,16 +167,27 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
           this.logger.error('Disconnected:', lastDisconnect.error);
         }
 
+        // Handle reconnection logic
         const errorCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
         const isLoggedOut = errorCode === DisconnectReason.loggedOut;
         if (!isLoggedOut) {
           if (this.retryCount < this.maxRetries) {
             this.retryCount++;
-            if (this.retryCount > 1 && (this.phoneNumber || this.sock.authState.creds.me)) {
+            if (
+              this.retryCount > 1 &&
+              (this.phoneNumber || this.sock.authState.creds.me)
+            ) {
+              // Delete the session directory if failed to reconnect with a phone number.
+              // Why? Because if the session directory is not deleted or empty, connecting with a phone number will throw an error, even if we retry to connect many times.
+              // So, we need to delete the session directory and restart the client to fix it.
+              // Why >1? Because the first retry is just a normal retry, after scanning the QR code. Ref: https://baileys.wiki/docs/socket/connecting
               this.logger.info('Deleting session directory');
               await rm(this.sessionDir, { recursive: true, force: true });
             }
-            this.logger.info(`Attempting reconnection (${this.retryCount}/${this.maxRetries})`);
+
+            this.logger.info(
+              `Attempting reconnection (${this.retryCount}/${this.maxRetries})`,
+            );
             await this.connect();
             this.emit('reconnect');
           } else {
@@ -179,6 +195,8 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
             this.emit('error', new WhatsAppError('Max retries reached'));
           }
         } else {
+          this.logger.info('Logged out');
+          this.emit('logout');
           await this.logout();
         }
       }
@@ -189,9 +207,11 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
       if (type === 'notify') {
         for (const message of messages) {
           if (message.key.fromMe) {
+            // Message sent by client
             this.emit('messageFromClient', message);
             this.logger.debug('Message sent by client:', message.key.id);
           } else {
+            // Received message from another user
             this.emit('message', message);
             this.logger.debug('Received message:', message.key.id);
           }
@@ -213,6 +233,7 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
   public async logout(): Promise<void> {
     try {
       if (this.sock) {
+        // Clear auth state in MongoDB
         if (this.mongodb) {
           const { url, databaseName, collectionName } = this.mongodb;
           await logoutInMongoDB(url, databaseName, collectionName);
@@ -224,6 +245,19 @@ export class FiWhatsAppClient extends EventEmitter<FiWhatsAppEventMap> {
       }
     } catch (error) {
       this.logger.error('Error logging out:', error);
+      throw error;
+    }
+  }
+
+  public disconnect(): void {
+    try {
+      if (this.sock?.ws) {
+        this.sock.ws.close();
+        this.isConnected = false;
+        this.logger.info('Disconnected from WhatsApp WebSocket gracefully');
+      }
+    } catch (error) {
+      this.logger.error('Error disconnecting gracefully:', error);
       throw error;
     }
   }
